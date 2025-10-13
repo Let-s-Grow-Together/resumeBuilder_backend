@@ -302,4 +302,4 @@ const addUniqueIdsToDescriptions = (data) => {
 
 const mockUserData = addUniqueIdsToDescriptions(rawMockUserData);
 
-export default mockUserDataw;
+export default mockUserData;
