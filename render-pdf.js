@@ -4,47 +4,42 @@ import puppeteer from "puppeteer";
 import fs from "fs";
 
 const app = express();
-app.use(cors({ origin: "http://localhost:5173" }));
-app.use(express.json({ limit: "10mb" }));
+app.use(cors());
+app.use(express.text({ type: 'text/html', limit: "5mb" }));
 
 app.post("/generate-pdf", async (req, res) => {
-    const { html } = req.body;
-    console.log("Received HTML length:", html?.length);
+    const html = req.body;
 
-    const browser = await puppeteer.launch({
-        headless: true,
-        args: ["--no-sandbox", "--disable-setuid-sandbox"],
-    });
+    if (!html) {
+        return res.status(400).send('No HTML provided');
+    }
 
-    const page = await browser.newPage();
-    await page.setViewport({ width: 794, height: 1123 });
+    try {
+        const browser = await puppeteer.launch({
+            headless: 'new',
+            args: ['--no-sandbox', '--disable-setuid-sandbox']
+        });
 
-    await page.setContent(html, { waitUntil: "networkidle0" });
-    await page.waitForSelector(".resume-view", { visible: true }).catch(() => {
-        console.log("⚠️ .resume-view not found — rendering anyway...");
-    });
+        const page = await browser.newPage();
+        await page.setContent(html, { waitUntil: 'networkidle0' });
 
-    await page.evaluateHandle("document.fonts.ready");
-    await page.screenshot({ path: "debug.png", fullPage: true });
-    console.log("✅ Screenshot saved as debug.png");
+        const pdfBuffer = await page.pdf({
+            format: 'A4',
+            printBackground: true
+        });
 
-    const pdfBuffer = await page.pdf({
-        format: "A4",
-        printBackground: true,
-    });
+        await browser.close();
 
-    // 🧩 Save the PDF locally for debugging
-    fs.writeFileSync("resume-test.pdf", pdfBuffer);
-    console.log("✅ Saved PDF as resume-test.pdf (check this file manually)");
+        res.set({
+            'Content-Type': 'application/pdf',
+            'Content-Disposition': 'attachment; filename="resume.pdf"',
+        });
 
-    await browser.close();
-
-    // Set the response headers to indicate this is a PDF
-    res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', 'attachment; filename="generated.pdf"');
-    
-    // Send the PDF as a response
-    res.send(pdfBuffer);
+        res.send(pdfBuffer);
+    } catch (err) {
+        console.error('PDF generation error:', err);
+        res.status(500).send('Failed to generate PDF');
+    }
 });
 //
 app.listen(3001, () => console.log("PDF server running on port 3001"));
