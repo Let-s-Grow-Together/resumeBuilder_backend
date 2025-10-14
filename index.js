@@ -28,6 +28,7 @@ app.post("/generate-pdf", async (req, res) => {
     if (!html) {
         return res.status(400).send('No HTML provided');
     }
+    console.log('Puppeteer Executable Path:', puppeteer.executablePath());
 
     try {
         const browser = await puppeteer.launch({
