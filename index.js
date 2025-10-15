@@ -33,21 +33,13 @@ app.post("/generate-pdf", async (req, res) => {
     try {
         const browser = await puppeteer.launch({
             headless: true,
-            userDataDir: '/tmp/puppeteer',
+            userDataDir: '/tmp/puppeteer', 
             executablePath: puppeteer.executablePath(),
             args: ['--no-sandbox', '--disable-setuid-sandbox']
         });
 
         const page = await browser.newPage();
-        await page.setContent(html, { waitUntil: 'domcontentloaded' });
-
-        // Wait for Font Awesome CSS to load
-        await page.waitForSelector('link[href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"]', { visible: true });
-        await page.waitForFunction(
-            'document.styleSheets[document.styleSheets.length - 1].cssRules.length > 0'
-        );
-
-        // await page.setContent(html, { waitUntil: 'networkidle0' });
+        await page.setContent(html, { waitUntil: 'networkidle0' });
 
         const pdfBuffer = await page.pdf({
             format: 'A4',
