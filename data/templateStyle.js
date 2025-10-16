@@ -4115,7 +4115,8 @@ const templateStyles = {
                 backgroundColor: "#32A548",
                 paddingLeft: "1.5rem",
                 paddingTop: "0.5rem",
-                paddingBottom: "0.5rem"
+                paddingBottom: "0.5rem",
+                boxSizing: "border-box"
             },
             heading: {
                 marginBottom: "0.1rem",
