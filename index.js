@@ -12,6 +12,7 @@ dotenv.config();
 
 const app = express();
 app.use(cors());
+app.use('/assets', express.static('public/assets'));
 app.use(express.json());
 
 // routes
@@ -40,7 +41,7 @@ app.post("/generate-pdf", async (req, res) => {
 
         const page = await browser.newPage();
         await page.setContent(html, { waitUntil: 'networkidle0' });
-
+        await page.evaluateHandle('document.fonts.ready');
         const pdfBuffer = await page.pdf({
             format: 'A4',
             printBackground: true
