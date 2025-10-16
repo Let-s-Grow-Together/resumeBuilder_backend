@@ -34,14 +34,18 @@ app.post("/generate-pdf", async (req, res) => {
     try {
         const browser = await puppeteer.launch({
             headless: true,
-            userDataDir: '/tmp/puppeteer', 
+            userDataDir: '/tmp/puppeteer',
             executablePath: puppeteer.executablePath(),
             args: ['--no-sandbox', '--disable-setuid-sandbox']
         });
 
         const page = await browser.newPage();
-        await page.setContent(html, { waitUntil: 'networkidle0' });
+        await page.setContent(html, {
+            waitUntil: 'domcontentloaded',
+            timeout: 60000
+        });
         await page.evaluateHandle('document.fonts.ready');
+
         const pdfBuffer = await page.pdf({
             format: 'A4',
             printBackground: true
